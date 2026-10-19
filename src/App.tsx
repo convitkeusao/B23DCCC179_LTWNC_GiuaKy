@@ -1,25 +1,32 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
+import { Provider } from 'react-redux';
+import { store } from './app/store';
+import { BooksPage } from './pages/BooksPage';
+import { ThemeProvider } from './context/ThemeContext';
+
+const StatsPage = lazy(() => import('./features/stats/StatsPage'));
 
 function App() {
+  const [path, setPath] = useState(window.location.pathname);
+  useEffect(() => {
+    const updatePath = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', updatePath);
+    return () => window.removeEventListener('popstate', updatePath);
+  }, []);
+  const stats = path.replace(/\/+$/, '') === '/stats';
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Provider store={store}>
+      <ThemeProvider>
+        {stats ? (
+          <Suspense fallback={<p role="status">Đang tải...</p>}>
+            <StatsPage />
+          </Suspense>
+        ) : (
+          <BooksPage />
+        )}
+      </ThemeProvider>
+    </Provider>
   );
 }
 

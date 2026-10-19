@@ -1,9 +1,19 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('renders the Mini Library page and loading state', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Khám phá sách' })).toBeInTheDocument();
+  expect(screen.getByRole('status')).toHaveTextContent('Đang tải...');
+});
+
+test('navigates to statistics without leaving the application', async () => {
+  window.history.replaceState({}, '', '/');
+  render(<App />);
+  fireEvent.click(screen.getByRole('link', { name: 'Thống kê' }));
+  expect(window.location.pathname).toBe('/stats');
+  expect(
+    await screen.findByRole('heading', { name: 'Thống kê thư viện' }),
+  ).toBeInTheDocument();
 });
